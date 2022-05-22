@@ -2,20 +2,87 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from myadmin.models import User,Shop
+from myadmin.models import Category
+from myadmin.models import Product
 
 #前台首页
 def index(request):
     """项目前台大堂点餐首页"""
-    return render(request,"web/index.html")
+    return redirect(reverse('web_index'))
 
+def webindex(request):
+    """项目前台大堂点餐首页"""
+    context={'categorylist':request.session.get('categorylist',{}).items()}
+    return render(request,"web/index.html",context)
 
 def login(request):
     '''加载登录页面'''
-    return render(request,"web/login.html")
+    shoplist = Shop.objects.filter(status=1)
+    context = {'shoplist': shoplist}
+    return render(request, "web/login.html", context)
 
 def dologin(request):
     '''执行登录'''
-    pass
+    try:
+        # 判断商铺选择
+        if request.POST['shop_id'] == '0':
+            # context = {'info':'请选择您所在的商铺！'}
+            return redirect(reverse('web_login') + "?typeinfo=1")
+            # return render(request,"web/login.html",context)
+
+        # 验证判断
+        verifycode = request.session['verifycode']
+        code = request.POST['code']
+        if verifycode != code:
+            return redirect(reverse('web_login') + "?typeinfo=2")
+            # context = {'info':'验证码错误！'}
+            # return render(request,"web/login.html",context)
+
+        # 根据登录账号获取用户信息
+        user = User.objects.get(username=request.POST['username'])
+        # 校验当前用户状态是否是管理员
+        if user.status == 6 or user.status ==1:
+            # 获取密码并md5
+            import hashlib
+            md5 = hashlib.md5()
+            n = user.password_salt
+            s = request.POST['pass'] + str(n)
+            md5.update(s.encode('utf-8'))
+            # 校验密码是否正确
+            if user.password_hash == md5.hexdigest():
+                # 将当前登录成功用户信息以adminuser这个key放入到session中
+                request.session['webuser'] = user.toDict()
+                # 加载当前商铺信息
+                shopob = Shop.objects.get(id=request.POST['shop_id'])
+                request.session['shopinfo'] = shopob.toDict()
+                # 获取当前店铺所对应的商品类别信息
+                clist = Category.objects.filter(shop_id=shopob.id, status=1)
+                categorylist = dict()
+                productlist = dict()
+                for vo in clist:
+                    c = {'id': vo.id, 'name': vo.name, 'pids': []}
+                    plist = Product.objects.filter(shop_id=shopob.id, category_id=vo.id, status=1)
+                    for p in plist:
+                        c['pids'].append(p.toDict())
+                        productlist[p.id] = p.toDict()
+                    categorylist[vo.id] = c
+                request.session['categorylist'] = categorylist  # 菜品类别列表
+                request.session['productlist'] = productlist  # 菜品列表
+                print(shopob, categorylist, productlist)
+                # 跳转首页
+                return redirect(reverse('web_index'))
+            else:
+                # context={"info":"登录密码错误！"}
+                return redirect(reverse('web_login') + "?typeinfo=5")
+        else:
+            # context={"info":"此用户非管理账号！"}
+            return redirect(reverse('web_login') + "?typeinfo=4")
+    except Exception as err:
+        print(err)
+        # context={"info":"登录账号不存在！"}
+        return redirect(reverse('web_login') + "?typeinfo=3")
+    # return render(request,"web/login.html",context)
 
 def logout(request):
     '''执行退出'''
