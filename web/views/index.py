@@ -13,6 +13,15 @@ def index(request):
 
 def webindex(request):
     """项目前台大堂点餐首页"""
+    # 从session中获取购物车cartlist信息，若没有默认为空字典{}
+    cartlist = request.session.get("cartlist", {})
+    total_money =0 #初始化一个总金额
+    #遍历购物车中的菜品并累加总金额
+    for vo in cartlist.values():
+        total_money+= vo['num']*vo['price']
+
+    request.session['total_money'] = total_money
+
     context={'categorylist':request.session.get('categorylist',{}).items()}
     return render(request,"web/index.html",context)
 

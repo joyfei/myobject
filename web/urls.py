@@ -3,7 +3,7 @@
 from django.urls import path,include
 
 from web.views import index,cart
-
+from web.views import orders
 
 urlpatterns = [
    path('', index.index, name="index"),#前台大堂点餐首页
@@ -22,6 +22,11 @@ urlpatterns = [
       path('cart/del/<str:pid>', cart.delete, name="web_cart_del"),#购物车删除
       path('cart/clear', cart.clear, name="web_cart_clear"), #购物车清空
       path('cart/change', cart.change, name="web_cart_change"),#购物车更改
+      # 订单处理
+        path('orders/<int:pIndex>', orders.index, name="web_orders_index"), #浏览订单
+        path('orders/insert', orders.insert,name='web_orders_insert'), #执行订单添加操作
+        path('orders/detail', orders.detail,name='web_orders_detail'), #订单的详情信息
+        path('orders/status', orders.status,name='web_orders_status'), #修改订单状态
    ]))
 
 ]

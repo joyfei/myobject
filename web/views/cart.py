@@ -35,9 +35,10 @@ def clear(request):
 
 def change(request):
     '''购物车信息修改'''
+    #从session中获取名字为cartlist的购物车信息，若没用显示{}
     cartlist = request.session['cartlist']
-    shopid = request.GET.get("pid",0)
-    num = int(request.GET.get('num',1))
+    shopid = request.GET.get("pid",0)#获取要修改的菜品id
+    num = int(request.GET.get('num',1))#要修改的数量
     if num < 1:
         num = 1
     cartlist[shopid]['num'] = num
