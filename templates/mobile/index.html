@@ -5,7 +5,7 @@
 	<!--头部-->
 	<header class="search" id="search">
 		<div class="header">
-			<h1>田老师红烧肉-朝阳将台路店</h1>
+			<h1>{{ request.session.shopinfo.name }}-{{ request.session.shopinfo.shop }}</h1>
 		</div>
 		<!--通知公告/客服电话-->
 	</header>
@@ -21,10 +21,12 @@
 		<!--左侧栏目-->
 		<div class="sortNav" id="sortNav">
 			<p class="icon-sort line">分类导航</p>
-			<a href="javascript:void(0);" onclick="doselectList(this,1)">双拼套餐</a>
-			<a href="javascript:void(0);" onclick="doselectList(this,2)" class="select">盖饭</a>
-			<a href="javascript:void(0);" onclick="doselectList(this,3)">小菜</a>
-			<a href="javascript:void(0);" onclick="doselectList(this,4)">汤/饮料</a>
+            {% for vo in categorylist %}
+			<a href="javascript:void(0);" onclick="doselectList(this,1)">{{ vo.name }}</a>
+            {% endfor %}
+{#			<a href="javascript:void(0);" onclick="doselectList(this,2)" class="select">盖饭</a>#}
+{#			<a href="javascript:void(0);" onclick="doselectList(this,3)">小菜</a>#}
+{#			<a href="javascript:void(0);" onclick="doselectList(this,4)">汤/饮料</a>#}
 		</div>
 
 		<!--右侧产品-->
@@ -131,16 +133,15 @@
 				共计：<span>¥0.00</span>
 			</div>
 		</div>
-
 	</article>
 
 	<!--底部栏目-->
 	<menu>
-		<a href="shop.html"><i class="icon-selectmore"></i>切换店铺</a>
+		<a href="{% url 'mobile_shop' %}"><i class="icon-selectmore"></i>切换店铺</a>
 		<!--a href="member-order.html"><i class="icon-allorders"></i>订单</a-->
 		<a href="javascript:void(0)" id="orderCart"><i class="icon-cart"><span>0</span></i>购物车</a>
-		<a href="member.html"><i class="icon-head"></i>我的</a>
-		<a><button onclick="location.href='order.html'">去结算</button></a>
+		<a href="{% url 'mobile_indexmobile_index' %}"><i class="icon-head"></i>我的</a>
+		<a><button onclick="location.href='{% url 'mobile_addorders' %}'">去结算</button></a>
 	</menu>
 
 	<!--弹出圈圈loading-->
